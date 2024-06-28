@@ -15,22 +15,44 @@ int n, r, it;
 
 int main()
 {
-    const int screenWidth = 1000;
-    const int screenHeight = 1000;
+    const int screenWidth = 500;
+    const int screenHeight = 500;
     InitWindow(screenWidth, screenHeight, "raygui - controls test suite");
     SetTargetFPS(60);
+
+    Camera2D camera = { 0 };
+    Vector2 center = {screenWidth/2.0f, screenHeight/2.0f};
+    camera.target = center;
+    camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+    camera.rotation = 0.0f;
+    camera.zoom = 1.0f;
 
     SCREENS curr = CONFIG;
     cellular_automata* CA = nullptr;
     const int cell_size = 30;
 
+    bool sizeEditMode = false;
+    bool ruleEditMode = false;
+
+    SetTargetFPS(60);
     while (!WindowShouldClose())
     {
 
-        if(curr==SIM && CA && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            CA->step();
-            std::cout << "NEXT STEP" << std::endl;
+        if(curr==SIM && CA) {
+            if(IsKeyPressed(KEY_N)){ CA->step(); ++it;}
+            if(IsKeyDown(KEY_W)) center.y -= 2;
+            if(IsKeyDown(KEY_A)) center.x -= 2;
+            if(IsKeyDown(KEY_S)) center.y += 2;
+            if(IsKeyDown(KEY_D)) center.x += 2;
+            camera.zoom += ((float)GetMouseWheelMove()*0.05f);
+            if (camera.zoom < 0.1f) camera.zoom = 0.1f;
+            if (IsKeyPressed(KEY_R))
+            {
+                camera.zoom = 1.0f;
+            }
+            camera.target = center;
         }
+
 
         // Draw
         //----------------------------------------------------------------------------------
@@ -41,19 +63,16 @@ int main()
             case CONFIG:
                 // ClearBackground(LIGHTGRAY);
 
-                GuiSliderBar((Rectangle){screenWidth/2.0f-75.0f, 135.0f, 200.0f, 20.0f}, "Size:", NULL, &n_f, 0.0f, 10.0f);
-                GuiLabel((Rectangle){screenWidth/2.0f+20.0f, 135.0f, 20, 20}, std::to_string((int)n_f).c_str());
+                if(GuiValueBox((Rectangle){screenWidth/2.0f-75.0f, 135.0f, 200.0f, 20.0f}, "Size:", &n, 0.0f, 10.0f, sizeEditMode)) sizeEditMode = !sizeEditMode;
+                // GuiLabel((Rectangle){screenWidth/2.0f+20.0f, 135.0f, 20, 20}, std::to_string((int)n_f).c_str());
+                if(GuiValueBox((Rectangle){screenWidth/2.0f-75.0f, 185.0f, 200.0f, 20.0f}, "Rule:", &r, 1.0f, 511.0f, ruleEditMode)) ruleEditMode = !ruleEditMode;
+                // GuiLabel((Rectangle){screenWidth/2.0f+20.0f, 185.0f, 20, 20}, std::to_string((int)r_f).c_str());
 
-                GuiSliderBar((Rectangle){screenWidth/2.0f-75.0f, 185.0f, 200.0f, 20.0f}, "Rule:", NULL, &r_f, 1.0f, 511.0f);
-                GuiLabel((Rectangle){screenWidth/2.0f+20.0f, 185.0f, 20, 20}, std::to_string((int)r_f).c_str());
-
-                GuiSliderBar((Rectangle){screenWidth/2.0f-75.0f, 235.0f, 200.0f, 20.0f}, "Iterations:", NULL, &it_f, 0.0f, 100.0f);
-                GuiLabel((Rectangle){screenWidth/2.0f+20.0f, 235.0f, 20, 20}, std::to_string((int)it_f).c_str());
+                // GuiSpinner((Rectangle){screenWidth/2.0f-75.0f, 235.0f, 200.0f, 20.0f}, "Iterations:", &it, 0.0f, 100.0f, true);
+                // // GuiLabel((Rectangle){screenWidth/2.0f+20.0f, 235.0f, 20, 20}, std::to_string((int)it_f).c_str());
 
                 if(GuiButton((Rectangle){screenWidth/2.0, 285, 80.0f, 20.0f}, "Generate")) {
-                    n  = static_cast<int>(n_f);
-                    r  = static_cast<int>(r_f);
-                    it = static_cast<int>(it_f);
+                    it = 0;
                     CA = new cellular_automata(r, n);
 
                     curr = SIM;
@@ -64,7 +83,8 @@ int main()
                     n = CA->get_size();
                     const float X = screenWidth/2.0f - cell_size*n/2.0f;
                     const float Y = screenWidth/2.0f - cell_size*n/2.0f;
-                    // DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
+                    BeginMode2D(camera);
+                    DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
                     for(int i = 0; i <= n; ++i) {
                         DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
                         DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
@@ -79,6 +99,17 @@ int main()
                             }
                         }
                     }
+                    EndMode2D();
+                    std::string text = "Iteration:    "+std::to_string(it);
+                    DrawRectangle( 10, 10, 250, 113, Fade(SKYBLUE, 0.5f));
+                    DrawRectangleLines( 10, 10, 250, 113, BLUE);
+
+                    DrawText(text.c_str(), 20, 20, 10, BLACK);
+                    DrawText("- W/A/S/D to Move Around The Grid", 40, 40, 10, DARKGRAY);
+                    DrawText("- Mouse Wheel to Zoom in-out", 40, 60, 10, DARKGRAY);
+                    DrawText("- N to move to the next state", 40, 80, 10, DARKGRAY);
+                    DrawText("- R to reset Zoom and Rotation", 40, 100, 10, DARKGRAY);
+
                 }
 
                 break;
