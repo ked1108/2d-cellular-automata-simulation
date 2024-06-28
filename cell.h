@@ -6,16 +6,17 @@
 #define DUPLICATIN_IN_CA_CELL_H
 
 
+#include <map>
 #include <vector>
 #include <string>
 
 class cell {
-    std::vector<std::string> pixel;
+    std::map<std::string, uint> pixel;
 public:
     bool state;
     cell(bool state, std::string pixel);
     std::string to_string();
-    cell operator^(cell& obj);
+    cell operator^(cell& obj) const;
     cell(bool state);
 };
 
