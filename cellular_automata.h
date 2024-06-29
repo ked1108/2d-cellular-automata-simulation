@@ -25,13 +25,13 @@ public:
     std::vector<cell> get_grid();
     int get_size() const;
     int get_pos(int x, int y) const;
-
+    void export_image(const std::string& filename);
 private:
     bool is_inbounds(int x, int y) const;
     void increase_size();
     void set_neighbours();
     void print();
-    void export_image(const std::string& filename);
+
 };
 
 
