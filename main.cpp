@@ -54,7 +54,7 @@ int main()
             if(IsKeyPressed(KEY_SPACE)) {
                 ++it;
                 if(checked) {
-                    CA->step(directory+"/"+std::to_string(it)+"_"+"iteration.csv");
+                    CA->step(directory+"/"+std::to_string(it)+"_iteration.csv");
                 } else {
                     CA->step();
                 }
@@ -91,11 +91,17 @@ int main()
 
 
             if(GuiButton((Rectangle){posX, posY +90, 80.0f, 20.0f}, "Generate")) {
-                it = 0;
-                directory = "rule"+std::to_string(r);
-                if(checked) std::filesystem::create_directory(directory);
-
-                image = std::vector<cell>(n*n, cell(false));
+                if(checked) {
+                    directory = "rule"+std::to_string(r);
+                    std::filesystem::create_directory(directory);
+                    for(int i = 1; i <= n; ++i) {
+                        for (int j = 1; j <= n; ++j) {
+                            image.emplace_back(false, "B"+std::to_string(j)+std::to_string(i));
+                        }
+                    }
+                } else {
+                    image = std::vector<cell>(n*n, cell(false));
+                }
 
                 curr = GRID;
             }
@@ -135,9 +141,9 @@ int main()
                 }
 
                 if(GuiButton((Rectangle){posX, posY +300.0f, 80.0f, 20.0f}, "Start")) {
-
+                    it = 0;
                     CA = new cellular_automata(r, n, image);
-
+                    if(checked) CA->export_image(directory+std::to_string(it)+"_iteration.csv");
                     curr = SIM;
                 }
 

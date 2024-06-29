@@ -20,8 +20,8 @@ cellular_automata::cellular_automata(int rule, int size, std::vector<cell> image
     set_neighbours();
     this->size = size;
     grid = std::move(image);
-    std::cout << "INITIAL STATE" << std::endl;
-    print();
+    // std::cout << "INITIAL STATE" << std::endl;
+    // print();
     export_image("initial.csv");
 }
 
@@ -93,7 +93,7 @@ std::vector<cell> cellular_automata::get_grid() {
 void cellular_automata::print() {
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
-            if (grid[get_pos(j, i)].state)    std::cout << char(219) << char(219) << " ";
+            if (grid[get_pos(j, i)].state)    std::cout << "██" << " ";
             else                              std::cout << "__" << " ";
         }
         std::cout << std::endl;
