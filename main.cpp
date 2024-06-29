@@ -17,7 +17,7 @@ int main()
 {
     const int screenWidth = 500;
     const int screenHeight = 500;
-    InitWindow(screenWidth, screenHeight, "raygui - controls test suite");
+    InitWindow(screenWidth, screenHeight, "Simulate 2D Cellular Automata");
     SetTargetFPS(60);
 
     Camera2D camera = { 0 };
@@ -38,8 +38,8 @@ int main()
     bool checked = false;
     float X, Y;
 
-    const float posY = 100.0f;
-    // const posY = ;
+    const float posY = 350.0f;
+    const float posX =  screenWidth/2.0f - 50.0f;
 
     SetTargetFPS(60);
     while (!WindowShouldClose())
@@ -81,13 +81,20 @@ int main()
             case CONFIG:
                 // ClearBackground(LIGHTGRAY);
 
-            if(GuiValueBox((Rectangle){screenWidth/2.0f-50.0f, posY, 100.0f, 20.0f}, "Size:    ", &n, 0.0f, 10.0f, sizeEditMode)) sizeEditMode = !sizeEditMode;
-            if(GuiValueBox((Rectangle){screenWidth/2.0f-50.0f, posY + 30, 100.0f, 20.0f}, "Rule:    ", &r, 0.0f, 511.0f, ruleEditMode)) ruleEditMode = !ruleEditMode;
-            GuiCheckBox((Rectangle){screenWidth/2.0f-90.0f, posY+60, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
-            if(GuiButton((Rectangle){screenWidth/2.0-50.0f, posY +90, 80.0f, 20.0f}, "Generate")) {
+            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 0.0f, 10.0f, sizeEditMode)) sizeEditMode = !sizeEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Rule:    ", &r, 0.0f, 511.0f, ruleEditMode)) ruleEditMode = !ruleEditMode;
+            GuiCheckBox((Rectangle){posX-40.0f, posY+60, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
+            Y = screenWidth/2.0f - cell_size*n/2.0f - 50.0f;
+            X = screenWidth/2.0f - cell_size*n/2.0f;
+
+            for(int i = 0; i <= n; ++i) {
+                DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
+                DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
+            }
+            if(GuiButton((Rectangle){posX, posY +90, 80.0f, 20.0f}, "Generate")) {
                 it = 0;
                 directory = "rule"+std::to_string(r);
-                std::filesystem::create_directory(directory);
+                if(checked) std::filesystem::create_directory(directory);
                 CA = new cellular_automata(r, n);
 
                 curr = SIM;
