@@ -82,7 +82,6 @@ void cellular_automata::step(const std::string& filename) {
     }
 
     grid = std::move(temp);
-    print();
     export_image(filename);
 }
 
