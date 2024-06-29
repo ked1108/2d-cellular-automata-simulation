@@ -8,11 +8,13 @@
 
 #include "raygui.h"
 
-typedef enum {CONFIG=0, SIM} SCREENS;
+typedef enum {CONFIG=0, GRID, SIM} SCREENS;
 
-// #define OFFWHITE (Color){0xc3, 0xc3, 0xc3, 255}
+int get_pos(int x, int y, int size);
 
 int n, r, it;
+
+
 int main()
 {
     const int screenWidth = 500;
@@ -36,15 +38,17 @@ int main()
     bool sizeEditMode = false;
     bool ruleEditMode = false;
     bool checked = false;
-    float X, Y;
+    float X, Y, Yend, Ystart, Xend, Xstart;
+    Vector2 mousepos;
 
-    const float posY = 350.0f;
+    const float posY = 135.0f;
     const float posX =  screenWidth/2.0f - 50.0f;
+
+    std::vector<cell> image;
 
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
-
 
         if(curr==SIM && CA) {
             if(IsKeyPressed(KEY_SPACE)) {
@@ -84,22 +88,60 @@ int main()
             if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 0.0f, 10.0f, sizeEditMode)) sizeEditMode = !sizeEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Rule:    ", &r, 0.0f, 511.0f, ruleEditMode)) ruleEditMode = !ruleEditMode;
             GuiCheckBox((Rectangle){posX-40.0f, posY+60, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
-            Y = screenWidth/2.0f - cell_size*n/2.0f - 50.0f;
-            X = screenWidth/2.0f - cell_size*n/2.0f;
 
-            for(int i = 0; i <= n; ++i) {
-                DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
-                DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
-            }
+
             if(GuiButton((Rectangle){posX, posY +90, 80.0f, 20.0f}, "Generate")) {
                 it = 0;
                 directory = "rule"+std::to_string(r);
                 if(checked) std::filesystem::create_directory(directory);
-                CA = new cellular_automata(r, n);
 
-                curr = SIM;
-            };
+                image = std::vector<cell>(n*n, cell(false));
+
+                curr = GRID;
+            }
             break;
+            case GRID:
+                Y = screenWidth/2.0f - cell_size*n/2.0f;
+                X = screenWidth/2.0f - cell_size*n/2.0f;
+
+                DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
+
+                for(int i = 0; i <= n; ++i) {
+                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
+                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
+                }
+
+                for(int i = 0; i < n; ++i) {
+                    for(int j = 0; j < n; ++j) {
+                        if(image[get_pos(j, i, n)].state) DrawRectangle(X+j*cell_size, Y+i*cell_size, cell_size, cell_size,RED);
+                    }
+                }
+
+                Ystart = screenWidth/2.0f - cell_size*n/2.0f;
+                Xstart = screenWidth/2.0f - cell_size*n/2.0f;
+                Xend = screenWidth/2.0f + cell_size*n/2.0f;
+                Yend = screenWidth/2.0f + cell_size*n/2.0f;
+
+                mousepos = GetMousePosition();
+                if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mousepos.x > Xstart && mousepos.x < Xend && mousepos.y > Ystart && mousepos.y < Yend) {
+                    mousepos.x -= Xstart;
+                    mousepos.y -= Ystart;
+
+                    int x = floor(mousepos.x/cell_size);
+                    int y = floor(mousepos.y/cell_size);
+                    int pos = get_pos(x, y, n);
+
+                    image[pos].state = !image[pos].state;
+                }
+
+                if(GuiButton((Rectangle){posX, posY +300.0f, 80.0f, 20.0f}, "Start")) {
+
+                    CA = new cellular_automata(r, n, image);
+
+                    curr = SIM;
+                }
+
+                break;
             case SIM:
             if(CA) {
                 n = CA->get_size();
@@ -140,3 +182,8 @@ int main()
     CloseWindow();
     return 0;
 }
+int get_pos(int x, int y, int size) {
+    return x+size*y;
+}
+
+
