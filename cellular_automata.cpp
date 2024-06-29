@@ -12,7 +12,7 @@ cellular_automata::cellular_automata(int rule, int size) {
     this->rule = rule;
     set_neighbours();
     this->size = size;
-    grid.assign(size*size, cell(false));
+    grid.assign(size*size, cell(true));
 }
 
 cellular_automata::cellular_automata(int rule, int size, std::vector<cell> image) {
@@ -31,6 +31,34 @@ void cellular_automata::evolutions(int n) {
         std::string filename = std::to_string(this->rule.to_ulong())+"_iteration_"+std::to_string(i+1)+".csv";
         step(filename);
     }
+}
+
+int cellular_automata::get_size() const {
+    return this->size;
+}
+
+
+void cellular_automata::step() {
+    increase_size();
+    std::vector<cell> temp = grid;
+
+    for (int i = 0; i < size; ++i) {
+        for (int j = 0; j < size; ++j) {
+            int pos = get_pos(j, i);
+            cell state(false);
+            for (int y = -1, ct = 0; y < 2; y++) {
+                for (int x = -1; x < 2; x++, ct++) {
+                    if(neighbours[ct] && is_inbounds(j+x, i+y)){
+                        int neighbour_pos = get_pos(j+x, i+y);
+                        state = state ^ grid[neighbour_pos];
+                    }
+                }
+            }
+            temp[pos] = state;
+        }
+    }
+
+    grid = std::move(temp);
 }
 
 void cellular_automata::step(const std::string& filename) {
@@ -54,9 +82,13 @@ void cellular_automata::step(const std::string& filename) {
     }
 
     grid = std::move(temp);
-    print();
     export_image(filename);
 }
+
+std::vector<cell> cellular_automata::get_grid() {
+    return this->grid;
+}
+
 
 void cellular_automata::print() {
     for (int i = 0; i < size; ++i) {
