@@ -36,7 +36,7 @@ cell::cell(bool state, std::string pixel) {
 cell cell::operator^(cell &obj) const {
     cell result(false);
     result.pixel = this->pixel;
-    result.pixel = std::accumulate(obj.pixel.begin(), obj.pixel.end(), result.pixel, [](std::map<std::string, uint> m, std::pair<const std::string, uint> &p) {
+    result.pixel = std::accumulate(obj.pixel.begin(), obj.pixel.end(), result.pixel, [](std::map<std::string, int> m, std::pair<const std::string, int> &p) {
         return (m[p.first] += p.second, m);
     });
 
