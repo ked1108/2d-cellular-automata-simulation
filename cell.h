@@ -11,7 +11,7 @@
 #include <string>
 
 class cell {
-    std::map<std::string, uint> pixel;
+    std::map<std::string, int> pixel;
 public:
     bool state;
     cell(bool state, std::string pixel);
