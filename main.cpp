@@ -1,6 +1,6 @@
 #include <iostream>
-#include "cellular_automata.h"
-#include "cell.h"
+#include "src/cellular_automata.h"
+#include "src/cell.h"
 #include "raylib.h"
 
 #define RAYGUI_IMPLEMENTATION
