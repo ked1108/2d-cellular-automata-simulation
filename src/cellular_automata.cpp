@@ -123,7 +123,7 @@ void cellular_automata::export_image(const std::string& filename) {
 void cellular_automata::set_rule(int n) {
     int k = n, i = 0;
     while(k!=0) {
-        rule[i++] = k % base;
+        rule[i++] = (k % base + base) % base;
         k = k / base;
     }
 }
