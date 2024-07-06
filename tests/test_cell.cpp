@@ -20,7 +20,7 @@ EXPECT_EQ(result.state, false);
 TEST(CellTest, ToString) {
     cell cell1(false);
     cell cell2(true, "B11");
-    cell cell3(true, "B12")
+    cell cell3(true, "B12");
 }
 
 int main(int argc, char **argv) {
