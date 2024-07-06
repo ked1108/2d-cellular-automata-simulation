@@ -10,15 +10,17 @@
 
 typedef enum {CONFIG=0, GRID, SIM} SCREENS;
 
+std::vector<Color> cols = {VIOLET, PURPLE, DARKBLUE, BLUE, SKYBLUE, DARKGREEN, GREEN, YELLOW, ORANGE, RED};
+
 int get_pos(int x, int y, int size);
 
-int n, r, it;
-
+int n = 2, b = 2, it;
+int r;
 
 int main()
 {
-    const int screenWidth = 500;
-    const int screenHeight = 500;
+    const int screenWidth = 1000;
+    const int screenHeight = 1000;
     InitWindow(screenWidth, screenHeight, "Simulate 2D Cellular Automata");
     SetTargetFPS(60);
 
@@ -30,13 +32,14 @@ int main()
     camera.zoom = 1.0f;
 
     SCREENS curr = CONFIG;
-    cellular_automata* CA = nullptr;
+    cellular_automata* CA;
     const int cell_size = 30;
 
     std::string directory;
 
     bool sizeEditMode = false;
     bool ruleEditMode = false;
+    bool baseEditMode = false;
     bool checked = false;
     float X, Y, Yend, Ystart, Xend, Xstart;
     Vector2 mousepos;
@@ -85,22 +88,23 @@ int main()
             case CONFIG:
                 // ClearBackground(LIGHTGRAY);
 
-            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 0.0f, 10.0f, sizeEditMode)) sizeEditMode = !sizeEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Rule:    ", &r, 0.0f, 511.0f, ruleEditMode)) ruleEditMode = !ruleEditMode;
-            GuiCheckBox((Rectangle){posX-40.0f, posY+60, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
+            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 2, 10, sizeEditMode)) sizeEditMode = !sizeEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Base:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
+            GuiCheckBox((Rectangle){posX-40.0f, posY+90, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
 
 
-            if(GuiButton((Rectangle){posX, posY +90, 80.0f, 20.0f}, "Generate")) {
+            if(GuiButton((Rectangle){posX, posY +120, 80.0f, 20.0f}, "Generate")) {
                 if(checked) {
                     directory = "rule"+std::to_string(r);
                     std::filesystem::create_directory(directory);
                     for(int i = 1; i <= n; ++i) {
                         for (int j = 1; j <= n; ++j) {
-                            image.emplace_back(false, "B"+std::to_string(j)+std::to_string(i));
+                            image.emplace_back(0, b, "B"+std::to_string(j)+std::to_string(i));
                         }
                     }
                 } else {
-                    image = std::vector<cell>(n*n, cell(false));
+                    image = std::vector<cell>(n*n, cell(0, b));
                 }
 
                 curr = GRID;
@@ -119,7 +123,7 @@ int main()
 
                 for(int i = 0; i < n; ++i) {
                     for(int j = 0; j < n; ++j) {
-                        if(image[get_pos(j, i, n)].state) DrawRectangle(X+j*cell_size, Y+i*cell_size, cell_size, cell_size,RED);
+                        DrawRectangle(X+j*cell_size, Y+i*cell_size, cell_size, cell_size,cols[image[get_pos(j, i, n)].state]);
                     }
                 }
 
@@ -137,12 +141,12 @@ int main()
                     int y = floor(mousepos.y/cell_size);
                     int pos = get_pos(x, y, n);
 
-                    image[pos].state = !image[pos].state;
+                    image[pos].state = (image[pos].state + 1) % b;
                 }
 
-                if(GuiButton((Rectangle){posX, posY +300.0f, 80.0f, 20.0f}, "Start")) {
+                if(GuiButton((Rectangle){posX, Yend +100.0f, 80.0f, 20.0f}, "Start")) {
                     it = 0;
-                    CA = new cellular_automata(r, n, image);
+                    CA = new cellular_automata(r, n, b, image);
                     if(checked) CA->export_image(directory+"/"+std::to_string(it)+"_iteration.csv");
                     curr = SIM;
                 }
@@ -156,16 +160,16 @@ int main()
                 BeginMode2D(camera);
                 DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
                 for(int i = 0; i <= n; ++i) {
-                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
+                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE); // NOLINT(*-narrowing-conversions)
                     DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
                 }
 
                 std::vector<cell> grid = CA->get_grid();
                 for(int i = 0; i < n; ++i) {
                     for (int j = 0; j < n; ++j) {
-                        if(grid[CA->get_pos(j, i)].state) {
-                            DrawRectangle(X+(j*cell_size), Y+(i*cell_size), cell_size, cell_size, RED);
-                        }
+
+                        DrawRectangle(X+(j*cell_size), Y+(i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
+
                     }
                 }
                 EndMode2D();

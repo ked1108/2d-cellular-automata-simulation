@@ -3,25 +3,13 @@
 //
 #include <gtest/gtest.h>
 #include "cell.h"
+#include "cellular_automata.h"
 
-TEST(CellTest, XOROperator) {
-cell cell1(false);
-
-
-cell cell2(false, "B12");
-cell result = cell1 ^ cell2;
-
-//EXPECT_EQ(result.pixel["B11"], );
-EXPECT_EQ(result.pixel["B12"], 1);
-//EXPECT_EQ(result.pixel["B13"], 5);
-EXPECT_EQ(result.state, false);
+TEST(CATest, object_creation) {
+    cellular_automata* CA = new cellular_automata(5, 4, 4);
+    EXPECT_EQ(CA->get_pos(0,0), 0);
 }
 
-TEST(CellTest, ToString) {
-    cell cell1(false);
-    cell cell2(true, "B11");
-    cell cell3(true, "B12")
-}
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

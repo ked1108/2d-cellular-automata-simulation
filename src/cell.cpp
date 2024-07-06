@@ -23,23 +23,25 @@ void pop_utf8(std::string& x) {
     x.pop_back();
 }
 
-cell::cell(bool state) {
+cell::cell(int state, int base) {
     this->state = state;
+    this->base = base;
     pixel = {};
 }
 
-cell::cell(bool state, std::string pixel) {
+cell::cell(int state, int base, std::string pixel) {
     this->state = state;
+    this->base = base;
     this->pixel = {{std::move(pixel), 1}};
 }
 
 cell cell::operator^(cell &obj) const {
-    cell result(false);
+    cell result(0, this->base);
     result.pixel = this->pixel;
     result.pixel = std::accumulate(obj.pixel.begin(), obj.pixel.end(), result.pixel, [](std::map<std::string, int> m, std::pair<const std::string, int> &p) {
         return (m[p.first] += p.second, m);
     });
-    result.state = this->state ^ obj.state;
+    result.state = (this->state + obj.state) % this->base;
     return result;
 }
 
