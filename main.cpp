@@ -100,7 +100,7 @@ int main()
                     std::filesystem::create_directory(directory);
                     for(int i = 1; i <= n; ++i) {
                         for (int j = 1; j <= n; ++j) {
-                            image.emplace_back(0, b, "B"+std::to_string(j)+std::to_string(i));
+                            image.emplace_back(0, b, "A"+std::to_string(j)+std::to_string(i));
                         }
                     }
                 } else {
@@ -141,7 +141,12 @@ int main()
                     int y = floor(mousepos.y/cell_size);
                     int pos = get_pos(x, y, n);
 
-                    image[pos].state = (image[pos].state + 1) % b;
+                    image[pos].state = ((image[pos].state + 1) % b + b) % b; //UPDATED TO THE POSITIVE MOD
+
+                    // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
+                    auto node = image[pos].pixel.extract(image[pos].pixel.begin()->first);
+                    node.key()[0] = image[pos].state + 'A';
+                    image[pos].pixel.insert(std::move(node));
                 }
 
                 if(GuiButton((Rectangle){posX, Yend +100.0f, 80.0f, 20.0f}, "Start")) {
