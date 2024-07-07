@@ -21,6 +21,7 @@ int main()
 {
     const int screenWidth = 1000;
     const int screenHeight = 1000;
+    int speed = 4;
     InitWindow(screenWidth, screenHeight, "Simulate 2D Cellular Automata");
     SetTargetFPS(60);
 
@@ -62,12 +63,18 @@ int main()
                     CA->step();
                 }
             }
-            if(IsKeyDown(KEY_W)) center.y -= 4;
-            if(IsKeyDown(KEY_A)) center.x -= 4;
-            if(IsKeyDown(KEY_S)) center.y += 4;
-            if(IsKeyDown(KEY_D)) center.x += 4;
+
+            if(IsKeyDown(KEY_W)) center.y -= speed;
+            if(IsKeyDown(KEY_A)) center.x -= speed;
+            if(IsKeyDown(KEY_S)) center.y += speed;
+            if(IsKeyDown(KEY_D)) center.x += speed;
+
+            if(IsKeyDown(KEY_PAGE_UP)) speed += 1;
+            if(IsKeyDown(KEY_PAGE_DOWN)) speed = (speed <= 4) ? 4 : --speed;
+
             if(IsKeyDown(KEY_Q)) camera.zoom -= 0.1f;
             if(IsKeyDown(KEY_E)) camera.zoom += 0.1f;
+
             camera.zoom += ((float)GetMouseWheelMove()*0.05f);
             if (camera.zoom < 0.1f) camera.zoom = 0.05f;
             if (IsKeyPressed(KEY_R))
