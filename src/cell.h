@@ -12,12 +12,14 @@
 
 class cell {
 public:
+    int base;
     std::map<std::string, int> pixel;
-    bool state;
-    cell(bool state, std::string pixel);
+    int state;
+
+    cell(int state, int base, std::string pixel);
     std::string to_string();
     cell operator^(cell& obj) const;
-    cell(bool state);
+    cell(int state, int base);
 };
 
 

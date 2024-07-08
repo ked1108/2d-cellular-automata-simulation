@@ -23,23 +23,25 @@ void pop_utf8(std::string& x) {
     x.pop_back();
 }
 
-cell::cell(bool state) {
+cell::cell(int state, int base) {
     this->state = state;
+    this->base = base;
     pixel = {};
 }
 
-cell::cell(bool state, std::string pixel) {
+cell::cell(int state, int base, std::string pixel) {
     this->state = state;
+    this->base = base;
     this->pixel = {{std::move(pixel), 1}};
 }
 
 cell cell::operator^(cell &obj) const {
-    cell result(false);
+    cell result(0, this->base);
     result.pixel = this->pixel;
     result.pixel = std::accumulate(obj.pixel.begin(), obj.pixel.end(), result.pixel, [](std::map<std::string, int> m, std::pair<const std::string, int> &p) {
         return (m[p.first] += p.second, m);
     });
-    result.state = this->state ^ obj.state;
+    result.state = ((this->state + obj.state) % this->base + this->base) % this->base;
     return result;
 }
 
@@ -47,8 +49,10 @@ std::string cell::to_string() {
     if(this->pixel.empty()) return "";
     std::string output;
     for(auto const& [key, val] : this->pixel) {
-        output += std::to_string(val) + key + "⊕";
+
+        if(val%base==1) output += key + "⊕";
+//        output += std::to_string(val) + key + "⊕";
     }
-    pop_utf8(output);
+    if(!output.empty()) pop_utf8(output);
     return output;
 }
