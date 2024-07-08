@@ -123,16 +123,16 @@ int main()
 
                 DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
 
-                for(int i = 0; i <= n; ++i) {
-                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
-                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
-                }
-
                 for(int i = 0; i < n; ++i) {
                     for(int j = 0; j < n; ++j) {
                         DrawRectangle(X+j*cell_size, Y+i*cell_size, cell_size, cell_size,cols[image[get_pos(j, i, n)].state]);
                     }
                 }
+                for(int i = 0; i <= n; ++i) {
+                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
+                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
+                }
+
 
                 Ystart = screenWidth/2.0f - cell_size*n/2.0f;
                 Xstart = screenWidth/2.0f - cell_size*n/2.0f;
@@ -151,9 +151,11 @@ int main()
                     image[pos].state = ((image[pos].state + 1) % b + b) % b; //UPDATED TO THE POSITIVE MOD
 
                     // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
-                    auto node = image[pos].pixel.extract(image[pos].pixel.begin()->first);
-                    node.key()[0] = image[pos].state + 'A';
-                    image[pos].pixel.insert(std::move(node));
+                    if(checked) {
+                        auto node = image[pos].pixel.extract(image[pos].pixel.begin()->first);
+                        node.key()[0] = image[pos].state + 'A';
+                        image[pos].pixel.insert(std::move(node));
+                    }
                 }
 
                 if(GuiButton((Rectangle){posX, Yend +100.0f, 80.0f, 20.0f}, "Start")) {
@@ -171,10 +173,7 @@ int main()
                 X = screenWidth/2.0f - cell_size*n/2.0f;
                 BeginMode2D(camera);
                 DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
-                for(int i = 0; i <= n; ++i) {
-                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE); // NOLINT(*-narrowing-conversions)
-                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
-                }
+
 
                 std::vector<cell> grid = CA->get_grid();
                 for(int i = 0; i < n; ++i) {
@@ -183,6 +182,10 @@ int main()
                         DrawRectangle(X+(j*cell_size), Y+(i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
 
                     }
+                }
+                for(int i = 0; i <= n; ++i) {
+                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE); // NOLINT(*-narrowing-conversions)
+                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
                 }
                 EndMode2D();
                 std::string text = "Iteration:    "+std::to_string(it);

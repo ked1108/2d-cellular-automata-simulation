@@ -76,7 +76,8 @@ void cellular_automata::step(const std::string& filename) {
                 for (int x = -1; x < 2; x++, ct++) {
                     if(neighbours[ct] && is_inbounds(j+x, i+y)){
                         int neighbour_pos = get_pos(j+x, i+y);
-                        state = state ^ grid[neighbour_pos];
+                        for(int k = 0; k < neighbours[ct]; k++)
+                            state = state ^ grid[neighbour_pos];
                     }
                 }
             }
@@ -113,6 +114,8 @@ void cellular_automata::export_image(const std::string& filename) {
 
     for (int i = 0; i < size; ++i) {
         for (int j = 0; j < size; ++j) {
+
+//            outFile << ((grid[get_pos(j, i)].state > 0) ? grid[get_pos(j, i)].to_string() : " " );
             outFile << grid[get_pos(j, i)].to_string();
             if(j < size -1) outFile << ", ";
         }
