@@ -19,8 +19,9 @@ int r;
 
 int main()
 {
-    const int screenWidth = 1000;
-    const int screenHeight = 1000;
+    SetTraceLogLevel(LOG_ERROR);
+    const int screenWidth = 700;
+    const int screenHeight = 700;
     int speed = 4;
     InitWindow(screenWidth, screenHeight, "Simulate 2D Cellular Automata");
     SetTargetFPS(60);
