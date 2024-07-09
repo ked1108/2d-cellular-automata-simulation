@@ -53,7 +53,8 @@ void cellular_automata::step() {
                 for (int x = -1; x < 2; x++, ct++) {
                     if(neighbours[ct] && is_inbounds(j+x, i+y)){
                         int neighbour_pos = get_pos(j+x, i+y);
-                        state = state ^ grid[neighbour_pos];
+                        for(int k = 0; k < neighbours[ct]; k++)
+                            state = state ^ grid[neighbour_pos];
                     }
                 }
             }

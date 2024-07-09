@@ -154,9 +154,6 @@ int main()
                     // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
                     if(checked) {n;
                         image[pos].pixel["B"+std::to_string(x+1)+std::to_string(y+1)] = image[pos].state;
-//                        auto node = image[pos].pixel.extract(image[pos].pixel.begin()->first);
-//                        node.key()[0] = image[pos].state + 'A';
-//                        image[pos].pixel.insert(std::move(node));
                     }
                 }
 
