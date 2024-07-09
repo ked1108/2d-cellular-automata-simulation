@@ -108,7 +108,7 @@ int main()
                     std::filesystem::create_directory(directory);
                     for(int i = 1; i <= n; ++i) {
                         for (int j = 1; j <= n; ++j) {
-                            image.emplace_back(0, b, "A"+std::to_string(j)+std::to_string(i));
+                            image.emplace_back(0, b, "B"+std::to_string(j)+std::to_string(i));
                         }
                     }
                 } else {
@@ -152,10 +152,11 @@ int main()
                     image[pos].state = ((image[pos].state + 1) % b + b) % b; //UPDATED TO THE POSITIVE MOD
 
                     // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
-                    if(checked) {
-                        auto node = image[pos].pixel.extract(image[pos].pixel.begin()->first);
-                        node.key()[0] = image[pos].state + 'A';
-                        image[pos].pixel.insert(std::move(node));
+                    if(checked) {n;
+                        image[pos].pixel["B"+std::to_string(x+1)+std::to_string(y+1)] = image[pos].state;
+//                        auto node = image[pos].pixel.extract(image[pos].pixel.begin()->first);
+//                        node.key()[0] = image[pos].state + 'A';
+//                        image[pos].pixel.insert(std::move(node));
                     }
                 }
 
