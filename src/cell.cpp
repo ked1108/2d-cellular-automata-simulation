@@ -32,7 +32,7 @@ cell::cell(int state, int base) {
 cell::cell(int state, int base, std::string pixel) {
     this->state = state;
     this->base = base;
-    this->pixel = {{std::move(pixel), 1}};
+    this->pixel = {{std::move(pixel), state}};
 }
 
 cell cell::operator^(cell &obj) const {
@@ -50,7 +50,7 @@ std::string cell::to_string() {
     std::string output;
     for(auto const& [key, val] : this->pixel) {
 
-        if(val%base==1) output += key + "⊕";
+        if(val > 0) output += std::to_string(val) + key + "⊕";
 //        output += std::to_string(val) + key + "⊕";
     }
     if(!output.empty()) pop_utf8(output);
