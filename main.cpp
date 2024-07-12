@@ -20,10 +20,13 @@ int r;
 int main()
 {
     SetTraceLogLevel(LOG_ERROR);
-    const int screenWidth = 700;
-    const int screenHeight = 700;
+    float screenWidth = 700;
+    float screenHeight = 700;
     int speed = 4;
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(screenWidth, screenHeight, "Simulate 2D Cellular Automata");
+
     SetTargetFPS(60);
 
     Camera2D camera = { 0 };
@@ -43,17 +46,25 @@ int main()
     bool ruleEditMode = false;
     bool baseEditMode = false;
     bool checked = false;
+    bool toggleGrid = true;
     float X, Y, Yend, Ystart, Xend, Xstart;
     Vector2 mousepos;
 
-    const float posY = 135.0f;
-    const float posX =  screenWidth/2.0f - 50.0f;
+    float posY = 135.0f;
+    float posX =  screenWidth/2.0f - 50.0f;
 
     std::vector<cell> image;
 
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
+        screenHeight = GetScreenHeight();
+        screenWidth = GetScreenWidth();
+
+        center = {screenWidth/2.0f, screenHeight/2.0f};
+
+        posY = 135.0f;
+        posX =  screenWidth/2.0f - 50.0f;
 
         if(curr==SIM && CA) {
             if(IsKeyPressed(KEY_SPACE)) {
@@ -73,6 +84,7 @@ int main()
             if(IsKeyDown(KEY_PAGE_UP)) speed += 1;
             if(IsKeyDown(KEY_PAGE_DOWN)) speed = (speed <= 4) ? 4 : --speed;
 
+
             if(IsKeyDown(KEY_Q)) camera.zoom -= 0.1f;
             if(IsKeyDown(KEY_E)) camera.zoom += 0.1f;
 
@@ -81,7 +93,7 @@ int main()
             if (IsKeyPressed(KEY_R))
             {
                 camera.zoom = 1.0f;
-                camera.target = {screenWidth/2.0, screenHeight/2.0};
+                camera.target = {screenWidth/2.0f, screenHeight/2.0f};
             }
             camera.target = center;
         }
@@ -97,7 +109,7 @@ int main()
                 // ClearBackground(LIGHTGRAY);
 
             if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 2, 10, sizeEditMode)) sizeEditMode = !sizeEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Base:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Base/Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
             GuiCheckBox((Rectangle){posX-40.0f, posY+90, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
 
@@ -119,8 +131,8 @@ int main()
             }
             break;
             case GRID:
-                Y = screenWidth/2.0f - cell_size*n/2.0f;
-                X = screenWidth/2.0f - cell_size*n/2.0f;
+                Y = GetScreenHeight()/2.0f - cell_size*n/2.0f;
+                X = GetScreenWidth()/2.0f - cell_size*n/2.0f;
 
                 DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
 
@@ -168,24 +180,26 @@ int main()
             case SIM:
             if(CA) {
                 n = CA->get_size();
-                Y = screenWidth/2.0f - cell_size*n/2.0f;
-                X = screenWidth/2.0f - cell_size*n/2.0f;
+                Y = GetScreenHeight()/2.0f - cell_size*n/2.0f;
+                X = GetScreenWidth()/2.0f - cell_size*n/2.0f;
+
                 BeginMode2D(camera);
                 DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
-
 
                 std::vector<cell> grid = CA->get_grid();
                 for(int i = 0; i < n; ++i) {
                     for (int j = 0; j < n; ++j) {
-
                         DrawRectangle(X+(j*cell_size), Y+(i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
-
                     }
                 }
-                for(int i = 0; i <= n; ++i) {
-                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE); // NOLINT(*-narrowing-conversions)
-                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
+
+                if(toggleGrid) {
+                    for(int i = 0; i <= n; ++i) {
+                        DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE); // NOLINT(*-narrowing-conversions)
+                        DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
+                    }
                 }
+
                 EndMode2D();
                 std::string text = "Iteration:    "+std::to_string(it);
                 DrawRectangle( 10, 10, 250, 113, Fade(SKYBLUE, 0.5f));
@@ -196,6 +210,10 @@ int main()
                 DrawText("- Mouse Wheel or Q/E to Zoom in-out", 40, 60, 10, DARKGRAY);
                 DrawText("- SPACE to move to the next state", 40, 80, 10, DARKGRAY);
                 DrawText("- R to reset Zoom and Rotation", 40, 100, 10, DARKGRAY);
+
+                DrawRectangle( screenWidth - 200, 10, 190, 100, Fade(SKYBLUE, 0.5f));
+                DrawRectangleLines( screenWidth - 200, 10, 190, 100, BLUE);
+                GuiCheckBox((Rectangle){ screenWidth - 190, 20, 20.0f, 20.0f}, "Toggle Grid Lines", &toggleGrid);
 
             }
 
