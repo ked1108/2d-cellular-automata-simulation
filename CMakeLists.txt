@@ -5,7 +5,13 @@ set(CMAKE_CXX_STANDARD 23)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ --static")
+if(WIN32)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ --static")
+endif ()
+
+if(UNIX)
+    set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++")
+endif ()
 
 # Dependencies
 set(RAYLIB_VERSION 5.0)

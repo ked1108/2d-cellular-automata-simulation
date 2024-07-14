@@ -58,10 +58,14 @@ int main()
     SetTargetFPS(60);
     while (!WindowShouldClose())
     {
-        screenHeight = GetScreenHeight();
-        screenWidth = GetScreenWidth();
-
-        center = {screenWidth/2.0f, screenHeight/2.0f};
+        if(screenWidth != GetScreenWidth()) {
+            screenWidth = GetScreenWidth();
+            center.x = screenWidth/2.0f;
+        }
+        if(screenHeight != GetScreenHeight()) {
+            screenHeight = GetScreenHeight();
+            center.y = screenHeight/2.0f;
+        }
 
         posY = 135.0f;
         posX =  screenWidth/2.0f - 50.0f;
@@ -88,7 +92,7 @@ int main()
             if(IsKeyDown(KEY_Q)) camera.zoom -= 0.1f;
             if(IsKeyDown(KEY_E)) camera.zoom += 0.1f;
 
-            camera.zoom += ((float)GetMouseWheelMove()*0.05f);
+            camera.zoom += GetMouseWheelMove()*0.05f;
             if (camera.zoom < 0.1f) camera.zoom = 0.05f;
             if (IsKeyPressed(KEY_R))
             {
