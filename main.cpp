@@ -113,7 +113,7 @@ int main()
                 // ClearBackground(LIGHTGRAY);
 
             if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 2, 10, sizeEditMode)) sizeEditMode = !sizeEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Base/Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
             GuiCheckBox((Rectangle){posX-40.0f, posY+90, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
 
