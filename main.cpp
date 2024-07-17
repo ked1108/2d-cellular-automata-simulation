@@ -152,9 +152,9 @@ int main()
 
 
                 Ystart = screenWidth/2.0f - cell_size*n/2.0f;
-                Xstart = screenWidth/2.0f - cell_size*n/2.0f;
+                Xstart = screenHeight/2.0f - cell_size*n/2.0f;
                 Xend = screenWidth/2.0f + cell_size*n/2.0f;
-                Yend = screenWidth/2.0f + cell_size*n/2.0f;
+                Yend = screenHeight/2.0f + cell_size*n/2.0f;
 
                 mousepos = GetMousePosition();
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mousepos.x > Xstart && mousepos.x < Xend && mousepos.y > Ystart && mousepos.y < Yend) {
@@ -168,7 +168,7 @@ int main()
                     image[pos].state = ((image[pos].state + 1) % b + b) % b; //UPDATED TO THE POSITIVE MOD
 
                     // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
-                    if(checked) {n;
+                    if(checked) {
                         image[pos].pixel["B"+std::to_string(x+1)+std::to_string(y+1)] = image[pos].state;
                     }
                 }
