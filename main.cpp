@@ -151,8 +151,8 @@ int main()
                 }
 
 
-                Ystart = screenWidth/2.0f - cell_size*n/2.0f;
-                Xstart = screenHeight/2.0f - cell_size*n/2.0f;
+                Ystart = screenHeight/2.0f - cell_size*n/2.0f;
+                Xstart = screenWidth/2.0f - cell_size*n/2.0f;
                 Xend = screenWidth/2.0f + cell_size*n/2.0f;
                 Yend = screenHeight/2.0f + cell_size*n/2.0f;
 
@@ -218,7 +218,12 @@ int main()
                 DrawRectangle( screenWidth - 200, 10, 190, 100, Fade(SKYBLUE, 0.5f));
                 DrawRectangleLines( screenWidth - 200, 10, 190, 100, BLUE);
                 GuiCheckBox((Rectangle){ screenWidth - 190, 20, 20.0f, 20.0f}, "Toggle Grid Lines", &toggleGrid);
-
+                if(GuiButton((Rectangle){screenWidth - 190, 60, 80.0f, 20.0f}, "Reset")) {
+                    curr = CONFIG;
+                    CA = nullptr;
+                    grid.clear();
+                    n = 2;
+                }
             }
 
             break;
