@@ -100,9 +100,10 @@ std::vector<cell> cellular_automata::get_grid() const {
 
 void cellular_automata::undo_step() {
     if(undo.size() > 1) {
+        grid.clear();
+        undo.pop();
         grid = undo.top();
         size -= 2;
-        undo.pop();
     }
 }
 
