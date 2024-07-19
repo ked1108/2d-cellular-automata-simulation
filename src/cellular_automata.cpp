@@ -15,6 +15,7 @@ cellular_automata::cellular_automata(int rule, int size, int base) {
     set_neighbours();
     this->size = size;
     grid.assign(size*size, cell(this->base, this->base));
+    undo.push(grid);
 }
 
 cellular_automata::cellular_automata(int rule, int size, int base, std::vector<cell> image) {
@@ -24,6 +25,7 @@ cellular_automata::cellular_automata(int rule, int size, int base, std::vector<c
     set_neighbours();
     this->size = size;
     grid = std::move(image);
+    undo.push(grid);
     // std::cout << "INITIAL STATE" << std::endl;
     // print();
 }
@@ -63,6 +65,7 @@ void cellular_automata::step() {
     }
 
     grid = std::move(temp);
+    undo.push(grid);
 }
 
 void cellular_automata::step(const std::string& filename) {
@@ -88,10 +91,19 @@ void cellular_automata::step(const std::string& filename) {
 
     grid = std::move(temp);
     export_image(filename);
+    undo.push(grid);
 }
 
 std::vector<cell> cellular_automata::get_grid() const {
     return this->grid;
+}
+
+void cellular_automata::undo_step() {
+    if(undo.size() > 1) {
+        grid = undo.top();
+        size -= 2;
+        undo.pop();
+    }
 }
 
 

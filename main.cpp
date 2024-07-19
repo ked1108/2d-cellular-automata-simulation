@@ -215,10 +215,13 @@ int main()
                 DrawText("- SPACE to move to the next state", 40, 80, 10, DARKGRAY);
                 DrawText("- R to reset Zoom and Rotation", 40, 100, 10, DARKGRAY);
 
-                DrawRectangle( screenWidth - 200, 10, 190, 100, Fade(SKYBLUE, 0.5f));
-                DrawRectangleLines( screenWidth - 200, 10, 190, 100, BLUE);
+                DrawRectangle( screenWidth - 200, 10, 190, 110, Fade(SKYBLUE, 0.5f));
+                DrawRectangleLines( screenWidth - 200, 10, 190, 110, BLUE);
                 GuiCheckBox((Rectangle){ screenWidth - 190, 20, 20.0f, 20.0f}, "Toggle Grid Lines", &toggleGrid);
-                if(GuiButton((Rectangle){screenWidth - 190, 60, 80.0f, 20.0f}, "Reset")) {
+                if(GuiButton((Rectangle){screenWidth - 190, 60, 80.0f, 20.0f}, "Undo")) {
+                    CA->undo_step();
+                }
+                if(GuiButton((Rectangle){screenWidth - 190, 90, 80.0f, 20.0f}, "Reset")) {
                     curr = CONFIG;
                     CA = nullptr;
                     grid.clear();

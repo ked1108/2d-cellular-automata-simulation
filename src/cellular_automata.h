@@ -7,6 +7,8 @@
 
 #include "cell.h"
 #include <array>
+#include <deque>
+#include <stack>
 #include <vector>
 
 class cellular_automata {
@@ -15,6 +17,7 @@ class cellular_automata {
     long long int r;
     std::array<int, 9> rule{};
     std::array<int, 9> neighbours;
+    std::stack<std::vector<cell>> undo;
 
 public:
     std::vector<cell> grid;
@@ -28,6 +31,7 @@ public:
     int get_size() const;
     int get_pos(int x, int y) const;
     void export_image(const std::string& filename);
+    void undo_step();
 private:
     void set_rule(int n);
     bool is_inbounds(int x, int y) const;
