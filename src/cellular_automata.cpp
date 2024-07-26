@@ -165,6 +165,7 @@ bool cellular_automata::is_inbounds(int x, int y) const {
     return !(x < 0 || x >= size.x || y < 0 || y >= size.y);
 }
 
+//TODO: Refactor this garbage ass code you wrote
 void cellular_automata::increase_size() {
     std::vector<cell> temp = grid;
     int offset = 0;

@@ -42,7 +42,8 @@ int main()
 
     std::string directory;
 
-    bool sizeEditMode = false;
+    bool sizeXEditMode = false;
+    bool sizeYEditMode = false;
     bool ruleEditMode = false;
     bool baseEditMode = false;
     bool checked = false;
@@ -113,13 +114,13 @@ int main()
                 // ClearBackground(LIGHTGRAY);
 
             if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size (x):    ", &x, 2, 10, sizeXEditMode)) sizeXEditMode = !sizeXEditMode;
-                if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size (x):    ", &x, 2, 10, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
-            GuiCheckBox((Rectangle){posX-40.0f, posY+90, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
+            if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f}, "Size (x):    ", &y, 2, 10, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 90, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
+            GuiCheckBox((Rectangle){posX-40.0f, posY+ 120, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
 
 
-            if(GuiButton((Rectangle){posX, posY +120, 80.0f, 20.0f}, "Generate")) {
+            if(GuiButton((Rectangle){posX, posY +150, 80.0f, 20.0f}, "Generate")) {
                 if(checked) {
                     directory = "rule"+std::to_string(r);
                     std::filesystem::create_directory(directory);
@@ -154,9 +155,9 @@ int main()
 
 
                 Ystart = screenHeight/2.0f - cell_size*y/2.0f;
-                Xstart = screenWidth/2.0f - cell_size*y/2.0f;
+                Xstart = screenWidth/2.0f - cell_size*x/2.0f;
                 Xend = screenWidth/2.0f + cell_size*x/2.0f;
-                Yend = screenHeight/2.0f + cell_size*x/2.0f;
+                Yend = screenHeight/2.0f + cell_size*y/2.0f;
 
                 mousepos = GetMousePosition();
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mousepos.x > Xstart && mousepos.x < Xend && mousepos.y > Ystart && mousepos.y < Yend) {
@@ -167,9 +168,8 @@ int main()
                     int i = floor(mousepos.y/cell_size);
                     int pos = get_pos(j, i, x);
 
-                    image[pos].state = ((image[pos].state + 1) % b + b) % b; //UPDATED TO THE POSITIVE MOD
+                    image[pos].state = ((image[pos].state + 1) % b + b) % b;
 
-                    // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
                     if(checked) {
                         image[pos].pixel["B"+std::to_string(j+1)+std::to_string(i+1)] = image[pos].state;
                     }
@@ -229,7 +229,8 @@ int main()
                     curr = CONFIG;
                     CA = nullptr;
                     grid.clear();
-                    n = 2;
+                    n.x = 2;
+                    n.y = 2;
                 }
             }
 
