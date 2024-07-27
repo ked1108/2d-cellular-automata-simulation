@@ -169,10 +169,10 @@ bool cellular_automata::is_inbounds(int x, int y) const {
 void cellular_automata::increase_size() {
     std::vector<cell> temp = grid;
     int offset = 0;
-    for (int i = 0; i < size.x; ++i) {
-        int beg_pos = get_pos(0, i);
+    for (int i = 0; i < size.y; ++i) {
+        const int beg_pos = get_pos(0, i);
         temp.insert(temp.begin()+beg_pos+offset++, cell(0, this->base));
-        int end_pos = get_pos(size.x, i);
+        const int end_pos = get_pos(size.x, i);
         temp.insert(temp.begin()+end_pos+offset++, cell(0, this->base));
     }
     size.x += 2;

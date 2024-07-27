@@ -10,10 +10,6 @@
 #include <deque>
 #include <stack>
 #include <vector>
-typedef struct {
-    int x;
-    int y;
-} Size;
 
 class cellular_automata {
     Size size;
@@ -36,6 +32,7 @@ public:
     int get_pos(int x, int y) const;
     void export_image(const std::string& filename);
     void undo_step();
+
 private:
     void set_rule(int n);
     bool is_inbounds(int x, int y) const;

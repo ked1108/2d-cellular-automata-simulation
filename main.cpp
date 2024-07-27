@@ -113,8 +113,8 @@ int main()
             case CONFIG:
                 // ClearBackground(LIGHTGRAY);
 
-            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size (x):    ", &x, 2, 10, sizeXEditMode)) sizeXEditMode = !sizeXEditMode;
-            if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f}, "Size (x):    ", &y, 2, 10, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
+            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Rows:    ", &y, 2, 10, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
+            if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f}, "Columns:    ", &x, 2, 10, sizeXEditMode)) sizeXEditMode = !sizeXEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 90, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
             GuiCheckBox((Rectangle){posX-40.0f, posY+ 120, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
@@ -200,10 +200,10 @@ int main()
                 }
 
                 if (toggleGrid) {
-                    for(int i = 0; i <= x; ++i)
+                    for(int i = 0; i <= n.x; ++i)
                         DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n.y*cell_size)}, BLUE);
 
-                    for(int i = 0; i <= y; ++i)
+                    for(int i = 0; i <= n.y; ++i)
                         DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n.x*cell_size), Y+(i*cell_size)}, BLUE);
                 }
 
