@@ -29,9 +29,10 @@ void apply_rule(std::vector<Node> image, int rule, Size size) {
     for (int i = 0; i < size.y; i++) {
         for(int j = 0; j < size.x; j++) {
             Node cell = image[get_pos(j, i, size.x)];
-            for(int y = -1; y <= 1; y++) {
-                for(int x = -1; x <= 1; x++) {
-                    if(check_in_bounds(j+x, i+y, size) and neighbours[ct] == 1)
+            for(int y = -1, ct = 0; y <= 1; y++) {
+                for(int x = -1; x <= 1; x++, ct++) {
+                    if(check_in_bounds(j+x, i+y, size) and neighbours[ct] == 1) {
+                    }
                 }
             }
         }
