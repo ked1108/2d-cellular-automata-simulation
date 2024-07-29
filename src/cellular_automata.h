@@ -7,6 +7,7 @@
 
 #include "cell.h"
 #include <array>
+#include <cstddef>
 #include <deque>
 #include <stack>
 #include <vector>
@@ -16,7 +17,8 @@ class cellular_automata {
     int base;
     long long int r;
     std::array<int, 9> rule{};
-    std::array<int, 9> neighbours;
+    std::vector<std::pair<short, short>> neighbours;
+    /*std::array<int, 9> neighbours;*/
     std::stack<std::vector<cell>> undo;
 
 public:

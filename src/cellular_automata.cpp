@@ -53,13 +53,11 @@ void cellular_automata::step() {
         for (int j = 0; j < size.x; ++j) {
             int pos = get_pos(j, i);
             cell state(0, base);
-            for (int y = -1, ct = 0; y < 2; y++) {
-                for (int x = -1; x < 2; x++, ct++) {
-                    if(neighbours[ct] && is_inbounds(j+x, i+y)){
-                        int neighbour_pos = get_pos(j+x, i+y);
-                        for(int k = 0; k < neighbours[ct]; k++)
-                            state = state ^ grid[neighbour_pos];
-                    }
+            for (auto p: neighbours) {
+                auto[x, y] = p;
+                if(is_inbounds(j+x, i+y)){
+                    int neighbour_pos = get_pos(j+x, i+y);
+                    state = state ^ grid[neighbour_pos];
                 }
             }
             temp[pos] = state;
@@ -78,13 +76,11 @@ void cellular_automata::step(const std::string& filename) {
         for (int j = 0; j < size.x; ++j) {
             int pos = get_pos(j, i);
             cell state(0, base);
-            for (int y = -1, ct = 0; y < 2; y++) {
-                for (int x = -1; x < 2; x++, ct++) {
-                    if(neighbours[ct] && is_inbounds(j+x, i+y)){
-                        int neighbour_pos = get_pos(j+x, i+y);
-                        for(int k = 0; k < neighbours[ct]; k++)
-                            state = state ^ grid[neighbour_pos];
-                    }
+            for (auto p: neighbours) {
+                auto[x, y] = p;
+                if(is_inbounds(j+x, i+y)){
+                    int neighbour_pos = get_pos(j+x, i+y);
+                    state = state ^ grid[neighbour_pos];
                 }
             }
             temp[pos] = state;
@@ -150,15 +146,24 @@ void cellular_automata::set_rule(int n) {
 
 
 void cellular_automata::set_neighbours() {
-    neighbours[0] = this->rule[6];
-    neighbours[1] = this->rule[7];
-    neighbours[2] = this->rule[8];
-    neighbours[3] = this->rule[5];
-    neighbours[4] = this->rule[0];
-    neighbours[5] = this->rule[1];
-    neighbours[6] = this->rule[4];
-    neighbours[7] = this->rule[3];
-    neighbours[8] = this->rule[2];
+    int temp[9];
+    temp[0] = this->rule[6];
+    temp[1] = this->rule[7];
+    temp[2] = this->rule[8];
+    temp[3] = this->rule[5];
+    temp[4] = this->rule[0];
+    temp[5] = this->rule[1];
+    temp[6] = this->rule[4];
+    temp[7] = this->rule[3];
+    temp[8] = this->rule[2];
+
+    for(int i = -1, ct = 0; i < 2; i++) {
+        for(int j = -1; j < 2; j++, ct++) {
+            if(temp[ct] == 1) {
+                neighbours.push_back({j, i});
+            }
+        }
+    }
 }
 
 bool cellular_automata::is_inbounds(int x, int y) const {
