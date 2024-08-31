@@ -1,4 +1,3 @@
-#include <iostream>
 #include "src/cellular_automata.h"
 #include "src/cell.h"
 #include "raylib.h"

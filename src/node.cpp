@@ -6,16 +6,14 @@
 
 #include <algorithm>
 #include <bitset>
-#include <set>
 #include <utility>
 #include <vector>
-
+#include <unordered_map>
 
 //TODO Create find_chain
 //TODO Create find_max
 //TODO Create find_k
 //TODO Create c2rules
-
 
 std::vector<std::pair<int, int>> set_neighbourhood(std::bitset<9> rule_l) {
     std::vector<int> temp;
@@ -39,7 +37,6 @@ std::vector<std::pair<int, int>> set_neighbourhood(std::bitset<9> rule_l) {
         }
     }
 
-
     return neighbours;
 }
 
@@ -47,45 +44,29 @@ bool check_in_bounds(int x, int y, Size size) {
     return x >= 0 and x < size.x and y >= 0 and y < size.y;
 }
 
-void apply_rule(std::vector<Node> image, int rule, Size size) {
+void apply_rule(std::vector<std::vector<int>> image, int rule, Size size) {
     std::bitset<9> rule_l = rule;
     std::vector neighbours = set_neighbourhood(rule_l);
     for (int i = 0; i < size.y; i++) {
         for(int j = 0; j < size.x; j++) {
-            Node* cell = &image[get_pos(j, i, size.x)];
+             std::vector<int> cell = image[get_pos(j, i, size.x)];
             for(auto p: neighbours) {
                 auto[x, y] = p;
                 if(check_in_bounds(j+x, i+y, size)) {
-                    if(cell->first == nullptr) {
-                        cell->first = &image[get_pos(j+x, j+y, size.x)];
-                    } else if (cell->second == nullptr){
-                        cell->second = &image[get_pos(j+x, j+y, size.x)];
-                    }
+                    int neighbour = get_pos(j+x, i+y, size.x);
+                    cell.push_back(neighbour);
                 }
             }
         }
     }
 }
 
-
-std::vector<std::vector<bool>> create_adjacency_matrix(const std::vector<Node>& image, const Size& size) {
-    std::vector adjacency_matrix(size.y, std::vector(size.x, false));
-    for(int i = 0; i < size.x*size.y; i++) {
-        if(image[i].first != nullptr)
-            adjacency_matrix[i][get_pos(image[i].first->x, image[i].first->y, size.x)] = true;
-        if(image[i].second != nullptr) 
-          adjacency_matrix[i][get_pos(image[i].second->x, image[i].second->y, size.x)] = true; 
-    } 
-    return adjacency_matrix;
-}
-
-
-
-std::vector<Node> find_incoming_nodes(int pos, const std::vector<Node>& image, const std::vector<std::vector<bool>>& adjacency_matrix) {
-    std::vector<Node> nodes;
+std::vector<int> find_incoming_nodes(int pos, const std::vector<std::vector<int>>& image) {
+    std::vector<int> nodes;
     for (int i = 0 ; i < image.size(); i++ ) {
-        if(adjacency_matrix[i][pos]){
-            nodes.push_back(image[i]);
+        auto it = std::find(image[i].begin(), image[i].end(), pos);
+        if(*it == pos){
+            nodes.push_back(i);
         }
     }
 
@@ -93,11 +74,12 @@ std::vector<Node> find_incoming_nodes(int pos, const std::vector<Node>& image, c
 }
 
 
-std::vector<Node> find_outgoing_nodes(int pos, const std::vector<Node>& image, const std::vector<std::vector<int>>& adjacency_matrix) {
-    std::vector<Node> nodes;
+std::vector<int> find_outgoing_nodes(int pos, const std::vector<Node>& image) {
+    std::vector<int> nodes;
     for (int i = 0 ; i < image.size(); i++ ) {
-        if(adjacency_matrix[pos][i] == 1){
-            nodes.push_back(image[i]);
+        auto it = std::find(image[i].begin(), image[i].end(), pos);
+        if(*it == pos){
+            nodes.push_back(i);
         }
     }
 
