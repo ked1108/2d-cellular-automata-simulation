@@ -6,7 +6,11 @@
 #include "cellular_automata.h"
 
 TEST(CATest, object_creation) {
-    EXPECT_EQ(0, 0);
+    cell A(1, 2, "B11");
+    cell B(1, 2, "B12");
+    cell C(1, 2, "B21");
+    A = B ^ C;
+    EXPECT_EQ(A.to_string(), "1B12+1B21");
 }
 
 int main(int argc, char **argv) {

@@ -170,7 +170,7 @@ int main()
                     image[pos].state = ((image[pos].state + 1) % b + b) % b;
 
                     if(checked) {
-                        image[pos].pixel["B"+std::to_string(j+1)+std::to_string(i+1)] = image[pos].state;
+                        image[pos].pixel["B"+std::to_string(i+1)+std::to_string(j+1)] = image[pos].state;
                     }
                 }
 
