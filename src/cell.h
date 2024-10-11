@@ -10,6 +10,12 @@
 #include <vector>
 #include <string>
 
+typedef struct {
+    int x;
+    int y;
+} Size;
+
+
 class cell {
 public:
     int base;

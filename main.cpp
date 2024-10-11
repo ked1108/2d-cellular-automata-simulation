@@ -1,4 +1,3 @@
-#include <iostream>
 #include "src/cellular_automata.h"
 #include "src/cell.h"
 #include "raylib.h"
@@ -10,11 +9,11 @@
 
 typedef enum {CONFIG=0, GRID, SIM} SCREENS;
 
-std::vector<Color> cols = {VIOLET, PURPLE, DARKBLUE, BLUE, SKYBLUE, DARKGREEN, GREEN, YELLOW, ORANGE, RED};
+std::array<Color, 10> cols = {WHITE, BLACK, RED, BLUE, GREEN, YELLOW, ORANGE, PINK, MAGENTA, BROWN};
 
 int get_pos(int x, int y, int size);
 
-int n = 2, b = 2, it;
+int x = 2, y = 2, b = 2, it;
 int r;
 
 int main()
@@ -42,7 +41,8 @@ int main()
 
     std::string directory;
 
-    bool sizeEditMode = false;
+    bool sizeXEditMode = false;
+    bool sizeYEditMode = false;
     bool ruleEditMode = false;
     bool baseEditMode = false;
     bool checked = false;
@@ -100,6 +100,32 @@ int main()
                 camera.target = {screenWidth/2.0f, screenHeight/2.0f};
             }
             camera.target = center;
+
+			if(IsKeyPressed(KEY_P)) {
+                Size n = CA->get_size();
+				Image output = GenImageColor(n.x*cell_size, n.y*cell_size, WHITE);
+                std::vector<cell> grid = CA->get_grid();
+				directory = "rule" + std::to_string(r);
+				std::filesystem::create_directory(directory);
+				std::string filename = directory + "/" + std::to_string(it)+"_image.png";
+
+				#pragma omp parallel for
+                for(int i = 0; i < n.y; ++i) {
+                    for (int j = 0; j < n.x; ++j) {
+                        ImageDrawRectangle(&output, (j*cell_size), (i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
+                    }
+                }
+
+                if (toggleGrid) {
+                    for(int i = 0; i <= n.x; ++i)
+                        ImageDrawLineV(&output, (Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n.y*cell_size)}, BLUE);
+
+                    for(int i = 0; i <= n.y; ++i)
+                        ImageDrawLineV(&output, (Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n.x*cell_size), Y+(i*cell_size)}, BLUE);
+                }
+
+				ExportImage(output, filename.c_str());
+			}
         }
 
 
@@ -112,70 +138,71 @@ int main()
             case CONFIG:
                 // ClearBackground(LIGHTGRAY);
 
-            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Size:    ", &n, 2, 10, sizeEditMode)) sizeEditMode = !sizeEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 30, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
-            if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
-            GuiCheckBox((Rectangle){posX-40.0f, posY+90, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
+            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Rows:    ", &y, 1, 100, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
+            if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f}, "Columns:    ", &x, 1, 100, sizeXEditMode)) sizeXEditMode = !sizeXEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
+            if(GuiValueBox((Rectangle){posX, posY + 90, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
+            GuiCheckBox((Rectangle){posX-40.0f, posY+ 120, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
 
 
-            if(GuiButton((Rectangle){posX, posY +120, 80.0f, 20.0f}, "Generate")) {
+            if(GuiButton((Rectangle){posX, posY +150, 80.0f, 20.0f}, "Generate")) {
                 if(checked) {
                     directory = "rule"+std::to_string(r);
                     std::filesystem::create_directory(directory);
-                    for(int i = 1; i <= n; ++i) {
-                        for (int j = 1; j <= n; ++j) {
+                    for(int i = 1; i <= y; ++i) {
+                        for (int j = 1; j <= x; ++j) {
                             image.emplace_back(0, b, "B"+std::to_string(j)+std::to_string(i));
                         }
                     }
                 } else {
-                    image = std::vector<cell>(n*n, cell(0, b));
+                    image = std::vector<cell>(x*y, cell(0, b));
                 }
 
                 curr = GRID;
             }
             break;
             case GRID:
-                Y = GetScreenHeight()/2.0f - cell_size*n/2.0f;
-                X = GetScreenWidth()/2.0f - cell_size*n/2.0f;
+                Y = GetScreenHeight()/2.0f - cell_size*y/2.0f;
+                X = GetScreenWidth()/2.0f - cell_size*x/2.0f;
 
-                DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
+                DrawRectangle(X, Y, cell_size*x, cell_size*y, SKYBLUE);
 
-                for(int i = 0; i < n; ++i) {
-                    for(int j = 0; j < n; ++j) {
-                        DrawRectangle(X+j*cell_size, Y+i*cell_size, cell_size, cell_size,cols[image[get_pos(j, i, n)].state]);
+                for(int i = 0; i < y; ++i) {
+                    for(int j = 0; j < x; ++j) {
+                        DrawRectangle(X+j*cell_size, Y+i*cell_size, cell_size, cell_size,cols[image[get_pos(j, i, x)].state]);
                     }
                 }
-                for(int i = 0; i <= n; ++i) {
-                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE);
-                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
-                }
+                for(int i = 0; i <= x; ++i)
+                    DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(y*cell_size)}, BLUE);
+
+                for(int i = 0; i <= y; ++i)
+                    DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(x*cell_size), Y+(i*cell_size)}, BLUE);
 
 
-                Ystart = screenHeight/2.0f - cell_size*n/2.0f;
-                Xstart = screenWidth/2.0f - cell_size*n/2.0f;
-                Xend = screenWidth/2.0f + cell_size*n/2.0f;
-                Yend = screenHeight/2.0f + cell_size*n/2.0f;
+                Ystart = screenHeight/2.0f - cell_size*y/2.0f;
+                Xstart = screenWidth/2.0f - cell_size*x/2.0f;
+                Xend = screenWidth/2.0f + cell_size*x/2.0f;
+                Yend = screenHeight/2.0f + cell_size*y/2.0f;
 
                 mousepos = GetMousePosition();
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && mousepos.x > Xstart && mousepos.x < Xend && mousepos.y > Ystart && mousepos.y < Yend) {
                     mousepos.x -= Xstart;
                     mousepos.y -= Ystart;
 
-                    int x = floor(mousepos.x/cell_size);
-                    int y = floor(mousepos.y/cell_size);
-                    int pos = get_pos(x, y, n);
+                    int j = floor(mousepos.x/cell_size);
+                    int i = floor(mousepos.y/cell_size);
+                    int pos = get_pos(j, i, x);
 
-                    image[pos].state = ((image[pos].state + 1) % b + b) % b; //UPDATED TO THE POSITIVE MOD
+                    image[pos].state = ((image[pos].state + 1) % b + b) % b;
 
-                    // ADDED SUPPORT FOR MULTIPLE STATES IN PIXELS
                     if(checked) {
-                        image[pos].pixel["B"+std::to_string(x+1)+std::to_string(y+1)] = image[pos].state;
+                        image[pos].pixel["B"+std::to_string(i+1)+std::to_string(j+1)] = image[pos].state;
                     }
                 }
 
                 if(GuiButton((Rectangle){posX, Yend +100.0f, 80.0f, 20.0f}, "Start")) {
                     it = 0;
-                    CA = new cellular_automata(r, n, b, image);
+                    CA = new cellular_automata(r, x, y, b, image);
                     if(checked) CA->export_image(directory+"/"+std::to_string(it)+"_iteration.csv");
                     curr = SIM;
                 }
@@ -183,26 +210,30 @@ int main()
                 break;
             case SIM:
             if(CA) {
-                n = CA->get_size();
-                Y = GetScreenHeight()/2.0f - cell_size*n/2.0f;
-                X = GetScreenWidth()/2.0f - cell_size*n/2.0f;
+                Size n = CA->get_size();
+                Y = GetScreenHeight()/2.0f - cell_size*n.y/2.0f;
+                X = GetScreenWidth()/2.0f - cell_size*n.x/2.0f;
 
                 BeginMode2D(camera);
-                DrawRectangle(X, Y, cell_size*n, cell_size*n, SKYBLUE);
+                DrawRectangle(X, Y, cell_size*n.x, cell_size*n.y, SKYBLUE);
 
                 std::vector<cell> grid = CA->get_grid();
-                for(int i = 0; i < n; ++i) {
-                    for (int j = 0; j < n; ++j) {
+
+				#pragma omp parallel for
+                for(int i = 0; i < n.y; ++i) {
+                    for (int j = 0; j < n.x; ++j) {
                         DrawRectangle(X+(j*cell_size), Y+(i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
                     }
                 }
 
-                if(toggleGrid) {
-                    for(int i = 0; i <= n; ++i) {
-                        DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n*cell_size)}, BLUE); // NOLINT(*-narrowing-conversions)
-                        DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n*cell_size), Y+(i*cell_size)}, BLUE);
-                    }
+                if (toggleGrid) {
+                    for(int i = 0; i <= n.x; ++i)
+                        DrawLineV((Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n.y*cell_size)}, BLUE);
+
+                    for(int i = 0; i <= n.y; ++i)
+                        DrawLineV((Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n.x*cell_size), Y+(i*cell_size)}, BLUE);
                 }
+
 
                 EndMode2D();
                 std::string text = "Iteration:    "+std::to_string(it);
@@ -220,12 +251,15 @@ int main()
                 GuiCheckBox((Rectangle){ screenWidth - 190, 20, 20.0f, 20.0f}, "Toggle Grid Lines", &toggleGrid);
                 if(GuiButton((Rectangle){screenWidth - 190, 60, 80.0f, 20.0f}, "Undo")) {
                     CA->undo_step();
+					--it;
                 }
                 if(GuiButton((Rectangle){screenWidth - 190, 90, 80.0f, 20.0f}, "Reset")) {
                     curr = CONFIG;
-                    CA = nullptr;
+					free(CA);
+					CA=nullptr;
                     grid.clear();
-                    n = 2;
+                    n.x = 2;
+                    n.y = 2;
                 }
             }
 

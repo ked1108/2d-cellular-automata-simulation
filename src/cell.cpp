@@ -46,10 +46,11 @@ cell cell::operator^(cell &obj) const {
 }
 
 std::string cell::to_string() {
-    if(this->pixel.empty()) return "";
+    // if(this->pixel.empty()) return "";
     std::string output;
     for(auto const& [key, val] : this->pixel) {
-        if(val > 0) output += std::to_string(val) + key + "⊕";
+        /*if(val > 0) output += std::to_string(val) + key + "+";*/
+        if(val > 0) output += std::to_string(val%2) + key + "+";
     }
     if(!output.empty()) pop_utf8(output);
     return output;
