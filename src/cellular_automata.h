@@ -25,7 +25,7 @@ public:
     std::vector<cell> grid;
 
     cellular_automata(int rule, int x, int y, int base);
-    cellular_automata(int rule, int x, int y, int base, std::vector<cell> image);
+    cellular_automata(int rule, int x, int y, int base, const std::vector<cell>& image);
     void evolutions(int n);
     void step();
     void step(const std::string& filename);

@@ -9,7 +9,7 @@
 
 typedef enum {CONFIG=0, GRID, SIM} SCREENS;
 
-std::vector<Color> cols = {VIOLET, PURPLE, DARKBLUE, BLUE, SKYBLUE, DARKGREEN, GREEN, YELLOW, ORANGE, RED};
+std::array<Color, 10> cols = {WHITE, BLACK, RED, BLUE, GREEN, YELLOW, ORANGE, PINK, MAGENTA, BROWN};
 
 int get_pos(int x, int y, int size);
 
@@ -100,6 +100,32 @@ int main()
                 camera.target = {screenWidth/2.0f, screenHeight/2.0f};
             }
             camera.target = center;
+
+			if(IsKeyPressed(KEY_P)) {
+                Size n = CA->get_size();
+				Image output = GenImageColor(n.x*cell_size, n.y*cell_size, WHITE);
+                std::vector<cell> grid = CA->get_grid();
+				directory = "rule" + std::to_string(r);
+				std::filesystem::create_directory(directory);
+				std::string filename = directory + "/" + std::to_string(it)+"_image.png";
+
+				#pragma omp parallel for
+                for(int i = 0; i < n.y; ++i) {
+                    for (int j = 0; j < n.x; ++j) {
+                        ImageDrawRectangle(&output, (j*cell_size), (i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
+                    }
+                }
+
+                if (toggleGrid) {
+                    for(int i = 0; i <= n.x; ++i)
+                        ImageDrawLineV(&output, (Vector2){X+(i*cell_size), Y }, (Vector2){X+(i*cell_size), Y+(n.y*cell_size)}, BLUE);
+
+                    for(int i = 0; i <= n.y; ++i)
+                        ImageDrawLineV(&output, (Vector2){X, Y+(i*cell_size)}, (Vector2){X+(n.x*cell_size), Y+(i*cell_size)}, BLUE);
+                }
+
+				ExportImage(output, filename.c_str());
+			}
         }
 
 
@@ -112,8 +138,8 @@ int main()
             case CONFIG:
                 // ClearBackground(LIGHTGRAY);
 
-            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Rows:    ", &y, 2, 10, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
-            if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f}, "Columns:    ", &x, 2, 10, sizeXEditMode)) sizeXEditMode = !sizeXEditMode;
+            if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, "Rows:    ", &y, 1, 100, sizeYEditMode)) sizeYEditMode = !sizeYEditMode;
+            if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f}, "Columns:    ", &x, 1, 100, sizeXEditMode)) sizeXEditMode = !sizeXEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f}, "Z:    ", &b, 2, 10, baseEditMode)) baseEditMode = !baseEditMode;
             if(GuiValueBox((Rectangle){posX, posY + 90, 100.0f, 20.0f}, "Rule:    ", &r, 0, pow(b, 9)-1, ruleEditMode)) ruleEditMode = !ruleEditMode;
             GuiCheckBox((Rectangle){posX-40.0f, posY+ 120, 20.0f, 20.0f}, "Generate Image Output Files", &checked);
@@ -192,6 +218,8 @@ int main()
                 DrawRectangle(X, Y, cell_size*n.x, cell_size*n.y, SKYBLUE);
 
                 std::vector<cell> grid = CA->get_grid();
+
+				#pragma omp parallel for
                 for(int i = 0; i < n.y; ++i) {
                     for (int j = 0; j < n.x; ++j) {
                         DrawRectangle(X+(j*cell_size), Y+(i*cell_size), cell_size, cell_size, cols[grid[CA->get_pos(j, i)].state]);
@@ -223,10 +251,12 @@ int main()
                 GuiCheckBox((Rectangle){ screenWidth - 190, 20, 20.0f, 20.0f}, "Toggle Grid Lines", &toggleGrid);
                 if(GuiButton((Rectangle){screenWidth - 190, 60, 80.0f, 20.0f}, "Undo")) {
                     CA->undo_step();
+					--it;
                 }
                 if(GuiButton((Rectangle){screenWidth - 190, 90, 80.0f, 20.0f}, "Reset")) {
                     curr = CONFIG;
-                    CA = nullptr;
+					free(CA);
+					CA=nullptr;
                     grid.clear();
                     n.x = 2;
                     n.y = 2;

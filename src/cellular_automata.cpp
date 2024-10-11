@@ -5,6 +5,7 @@
 #include <iostream>
 #include <utility>
 #include <fstream>
+#include <omp.h>
 #include "cellular_automata.h"
 #include "cell.h"
 
@@ -19,7 +20,7 @@ cellular_automata::cellular_automata(int rule, int x, int y, int base) {
     undo.push(grid);
 }
 
-cellular_automata::cellular_automata(int rule, int x, int y, int base, std::vector<cell> image) {
+cellular_automata::cellular_automata(int rule, int x, int y, int base, const std::vector<cell>& image) {
     this->base = base;
     this->r = rule;
     set_rule(rule);
@@ -49,6 +50,7 @@ void cellular_automata::step() {
     increase_size();
     std::vector<cell> temp = grid;
 
+	#pragma omp parallel collapse(2)
     for (int i = 0; i < size.y; ++i) {
         for (int j = 0; j < size.x; ++j) {
             int pos = get_pos(j, i);
