@@ -336,7 +336,7 @@ void HandleInputEvents(void) {
 
 		if(IsKeyPressed(KEY_P)) {
 			std::filesystem::create_directory(directory);
-			std::string filename = directory+"/"+std::to_string(state.rule)+"_image.png";
+			std::string filename = directory+"/"+std::to_string(state.rule)+"_"+std::to_string(state.it)+"_image.png";
 			takeScreenshot(filename);
 		}
 	}
