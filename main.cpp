@@ -1,44 +1,10 @@
-#include "src/cellular_automata.h"
-#include "src/cell.h"
-
+#include "main.h"
 #include <filesystem>
 
-#include "raylib.h"
+#include "src/cellular_automata.h"
+#include "src/cell.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
-
-
-
-#define CELL_SIZE 30
-
-std::array<Color, 10> cols =
-			{WHITE, BLACK, RED, BLUE, GREEN, YELLOW, ORANGE, PINK, MAGENTA, BROWN};
-
-typedef enum {CONFIG=0, GRID, SIM} SCREEN;
-
-typedef struct State {
-	int cols;
-	int rows;
-	int z;
-	int rule;
-	int it;
-	float screenWidth;
-	float screenHeight;
-	bool gen_coeffs;
-	Vector2 center;
-	Camera2D camera;
-	SCREEN curr;
-} State; 
-
-void DrawConfigScene(void);
-void DrawSimScene(void);
-void DrawGridScene(void);
-
-void InitState(void);
-void UpdateState(void);
-void HandleInputEvents(void);
-int get_pos(int x, int y, int size);
-void takeScreenshot(const std::string filename);
 
 State state;
 cellular_automata* CA;
@@ -63,7 +29,6 @@ int main() {
 	SetTargetFPS(60);
 	while (!WindowShouldClose())
 	{
-
 		UpdateState();
 		HandleInputEvents();
 
@@ -104,18 +69,18 @@ void DrawSimScene(void) {
 	for(int i = 0; i < n.y; ++i) {
 		for (int j = 0; j < n.x; ++j) {
 			DrawRectangle(X+(j*CELL_SIZE), Y+(i*CELL_SIZE), 
-				 			CELL_SIZE, CELL_SIZE, cols[grid[CA->get_pos(j, i)].state]);
+								 CELL_SIZE, CELL_SIZE, cols[grid[CA->get_pos(j, i)].state]);
 		}
 	}
 
 	if(toggleGrid) {
 		for(int i = 0; i <= n.x; ++i)
 			DrawLineV((Vector2){X+(i*CELL_SIZE), Y }, 
-			 			(Vector2){X+(i*CELL_SIZE), Y+(n.y*CELL_SIZE)}, BLUE);
+						 (Vector2){X+(i*CELL_SIZE), Y+(n.y*CELL_SIZE)}, BLUE);
 
 		for(int i = 0; i <= n.y; ++i)
 			DrawLineV((Vector2){X, Y+(i*CELL_SIZE)}, 
-			 			(Vector2){X+(n.x*CELL_SIZE), Y+(i*CELL_SIZE)}, BLUE);
+						 (Vector2){X+(n.x*CELL_SIZE), Y+(i*CELL_SIZE)}, BLUE);
 	}
 
 
@@ -134,7 +99,7 @@ void DrawSimScene(void) {
 	DrawRectangle( state.screenWidth - 200, 10, 190, 130, Fade(SKYBLUE, 0.5f));
 	DrawRectangleLines( state.screenWidth - 200, 10, 190, 130, BLUE);
 	GuiCheckBox((Rectangle){ state.screenWidth - 190, 20, 20.0f, 20.0f}, 
-			 	"Toggle Grid Lines", &toggleGrid);
+						 "Toggle Grid Lines", &toggleGrid);
 	if(GuiButton((Rectangle){state.screenWidth - 190, 60, 80.0f, 20.0f}, "Undo")) {
 		CA->undo_step();
 		--state.it;
@@ -170,24 +135,24 @@ void DrawGridScene(void) {
 	for(int i = 0; i < state.rows; ++i) {
 		for(int j = 0; j < state.cols; ++j) {
 			DrawRectangle(X+j*CELL_SIZE, Y+i*CELL_SIZE, 
-				 		 CELL_SIZE, CELL_SIZE,
-				 		cols[image[get_pos(j, i, state.cols)].state]);
+								 CELL_SIZE, CELL_SIZE,
+								 cols[image[get_pos(j, i, state.cols)].state]);
 		}
 	}
 	for(int i = 0; i <= state.cols; ++i)
 		DrawLineV((Vector2){X+(i*CELL_SIZE), Y }, 
-					(Vector2){X+(i*CELL_SIZE), Y+(state.rows*CELL_SIZE)}, BLUE);
+						(Vector2){X+(i*CELL_SIZE), Y+(state.rows*CELL_SIZE)}, BLUE);
 
 	for(int i = 0; i <= state.rows; ++i)
 		DrawLineV((Vector2){X, Y+(i*CELL_SIZE)}, 
-					(Vector2){X+(state.cols*CELL_SIZE), Y+(i*CELL_SIZE)}, BLUE);
+						(Vector2){X+(state.cols*CELL_SIZE), Y+(i*CELL_SIZE)}, BLUE);
 
 
 
 	Vector2 mousepos = GetMousePosition();
 	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && 
-							mousepos.x > Xstart && mousepos.x < Xend &&
-							mousepos.y > Ystart && mousepos.y < Yend) 
+		mousepos.x > Xstart && mousepos.x < Xend &&
+		mousepos.y > Ystart && mousepos.y < Yend) 
 	{
 		mousepos.x -= Xstart;
 		mousepos.y -= Ystart;
@@ -222,32 +187,32 @@ void DrawConfigScene(void) {
 	float posX =  state.screenWidth/2.0f - 50.0f;
 
 	if(GuiValueBox((Rectangle){posX, posY, 100.0f, 20.0f}, 
-					"Rows:    ", 
-					&state.rows, 1, 100, sizeYEditMode)) 		
+								"Rows:    ", 
+								&state.rows, 1, 100, sizeYEditMode)) 		
 	{
 		sizeYEditMode = !sizeYEditMode;
 	}
 	if(GuiValueBox((Rectangle){posX, posY+30, 100.0f, 20.0f},
-					"Columns:    ", 
-					&state.cols, 1, 100, sizeXEditMode)) 	
+								"Columns:    ", 
+								&state.cols, 1, 100, sizeXEditMode)) 	
 	{
 		sizeXEditMode = !sizeXEditMode;
 	}
 	if(GuiValueBox((Rectangle){posX, posY + 60, 100.0f, 20.0f},
-					"Z:    ", 
-					&state.z, 2, 10, baseEditMode)) 			
+								"Z:    ", 
+								&state.z, 2, 10, baseEditMode)) 			
 	{
 		baseEditMode = !baseEditMode;
 	}
 	if(GuiValueBox((Rectangle){posX, posY + 90, 100.0f, 20.0f}, 
-					"Rule:    ", 
-					&state.rule, 0, pow(state.z, 9)-1, ruleEditMode)) 
+								"Rule:    ", 
+								&state.rule, 0, pow(state.z, 9)-1, ruleEditMode)) 
 	{
 		ruleEditMode = !ruleEditMode;
 	}
 
 	GuiCheckBox((Rectangle){posX-40.0f, posY+ 120, 20.0f, 20.0f}, 
-			 		"Generate Coefficient Files", &state.gen_coeffs);
+						 "Generate Coefficient Files", &state.gen_coeffs);
 
 
 
@@ -269,34 +234,34 @@ void DrawConfigScene(void) {
 }
 
 void InitState(void) {
-	state.cols 					= 2;
-	state.rows 					= 2;
-	state.z 					= 2;
-	state.rule					= 0;
-	state.it					= 0;
-	state.gen_coeffs 			= false;
+	state.cols 							= 2;
+	state.rows 							= 2;
+	state.z 								= 2;
+	state.rule							= 0;
+	state.it								= 0;
+	state.gen_coeffs 				= false;
 	state.screenWidth 			= 700.0f;
 	state.screenHeight 			= 700.0f;
-	state.center 				= {state.screenWidth/2.0f, state.screenHeight/2.0f};
-
+	state.center 						= {state.screenWidth/2.0f, state.screenHeight/2.0f};
+	state.camera 						= {0};
 	state.camera.target 		= state.center;
-	state.camera.offset 		= (Vector2){ state.screenWidth/2.0f, state.screenHeight/2.0f };
-	state.camera.rotation 		= 0.0f;
+	state.camera.offset 		= state.center;
+	state.camera.rotation 	= 0.0f;
 	state.camera.zoom 			= 1.0f;
 
-	state.curr 					= CONFIG;
+	state.curr 							= CONFIG;
 
 	InitWindow(state.screenWidth, state.screenHeight, "Simulate 2D Cellular Automata");
 }
 
 void UpdateState(void) {
-	if(state.screenWidth != GetScreenWidth()) {
+	if(IsWindowResized()) {
 		state.screenWidth = GetScreenWidth();
 		state.center.x = state.screenWidth/2.0f;
-	}
-	if(state.screenHeight != GetScreenHeight()) {
 		state.screenHeight = GetScreenHeight();
 		state.center.y = state.screenHeight/2.0f;
+
+		state.camera.target = state.center;
 	}
 }
 
@@ -330,9 +295,9 @@ void HandleInputEvents(void) {
 		if (IsKeyPressed(KEY_R))
 		{
 			state.camera.zoom = 1.0f;
-			state.camera.target = {state.screenWidth/2.0f, state.screenHeight/2.0f};
+			state.camera.offset = {state.screenWidth/2.0f, state.screenHeight/2.0f};
 		}
-		state.camera.target = state.center;
+		state.camera.offset = state.center;
 
 		if(IsKeyPressed(KEY_P)) {
 			std::filesystem::create_directory(directory);
@@ -356,8 +321,8 @@ void takeScreenshot(const std::string filename) {
 	for(int i = 0; i < n.y; ++i) {
 		for (int j = 0; j < n.x; ++j) {
 			ImageDrawRectangle(&output, (j*CELL_SIZE), (i*CELL_SIZE), 
-					  			CELL_SIZE, CELL_SIZE,
-					  			cols[grid[CA->get_pos(j, i)].state]);
+											CELL_SIZE, CELL_SIZE,
+											cols[grid[CA->get_pos(j, i)].state]);
 		}
 	}
 
