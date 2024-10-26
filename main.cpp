@@ -1,12 +1,14 @@
 #include "main.h"
 #include <filesystem>
 
+#include "raylib.h"
 #include "src/cellular_automata.h"
 #include "src/cell.h"
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
 State state;
+RenderTexture2D tex;
 cellular_automata* CA;
 
 std::vector<cell> image;
@@ -27,8 +29,7 @@ int main() {
 
 
 	SetTargetFPS(60);
-	while (!WindowShouldClose())
-	{
+	while (!WindowShouldClose()) {
 		UpdateState();
 		HandleInputEvents();
 
@@ -61,29 +62,8 @@ void DrawSimScene(void) {
 	X = GetScreenWidth()/2.0f - CELL_SIZE*n.x/2.0f;
 
 	BeginMode2D(state.camera);
-	DrawRectangle(X, Y, CELL_SIZE*n.x, CELL_SIZE*n.y, SKYBLUE);
-
-	std::vector<cell> grid = CA->get_grid();
-
-	#pragma omp parallel for
-	for(int i = 0; i < n.y; ++i) {
-		for (int j = 0; j < n.x; ++j) {
-			DrawRectangle(X+(j*CELL_SIZE), Y+(i*CELL_SIZE), 
-								 CELL_SIZE, CELL_SIZE, cols[grid[CA->get_pos(j, i)].state]);
-		}
-	}
-
-	if(toggleGrid) {
-		for(int i = 0; i <= n.x; ++i)
-			DrawLineV((Vector2){X+(i*CELL_SIZE), Y }, 
-						 (Vector2){X+(i*CELL_SIZE), Y+(n.y*CELL_SIZE)}, BLUE);
-
-		for(int i = 0; i <= n.y; ++i)
-			DrawLineV((Vector2){X, Y+(i*CELL_SIZE)}, 
-						 (Vector2){X+(n.x*CELL_SIZE), Y+(i*CELL_SIZE)}, BLUE);
-	}
-
-
+	DrawTextureRec(tex.texture, (Rectangle){0, 0, (float)tex.texture.width, (float)-tex.texture.height}, (Vector2){X, Y}, WHITE);
+	/*DrawTexture(tex.texture, X, Y, WHITE);*/
 	EndMode2D();
 	std::string text = "Iteration:    "+std::to_string(state.it);
 	DrawRectangle( 10, 10, 250, 133, Fade(SKYBLUE, 0.5f));
@@ -108,7 +88,6 @@ void DrawSimScene(void) {
 		state.curr = CONFIG;
 		free(CA);
 		CA=nullptr;
-		grid.clear();
 		n.x = 2;
 		n.y = 2;
 	}
@@ -176,6 +155,7 @@ void DrawGridScene(void) {
 			std::string directory = "rule"+std::to_string(state.rule);
 			CA->export_image(directory+"/"+std::to_string(state.it)+"_iteration.csv");
 		}
+		DrawTex();
 		state.curr = SIM;
 	}
 
@@ -233,6 +213,34 @@ void DrawConfigScene(void) {
 	}
 }
 
+void DrawTex() {
+	Size n = CA->get_size();
+	std::vector<cell> grid = CA->get_grid();
+	tex = LoadRenderTexture(n.x*CELL_SIZE+2, n.y*CELL_SIZE+2);
+	BeginTextureMode(tex);
+	DrawRectangle(0, 0, CELL_SIZE*n.x, CELL_SIZE*n.y, SKYBLUE);
+
+
+	#pragma omp parallel for
+	for(int i = 0; i < n.y; ++i) {
+		for (int j = 0; j < n.x; ++j) {
+			DrawRectangle((j*CELL_SIZE), (i*CELL_SIZE), 
+								 CELL_SIZE, CELL_SIZE, cols[grid[CA->get_pos(j, i)].state]);
+		}
+	}
+
+	if(toggleGrid) {
+		for(int i = 0; i <= n.x; ++i)
+			DrawLineEx((Vector2){(float)(i*CELL_SIZE), 0 }, 
+						 (Vector2){(float)(i*CELL_SIZE), (float)(n.y*CELL_SIZE)}, 2.0f, BLUE);
+
+		for(int i = 0; i <= n.y; ++i)
+			DrawLineEx((Vector2){0, (float)(i*CELL_SIZE)}, 
+						 (Vector2){(float)(n.x*CELL_SIZE), (float)(i*CELL_SIZE)}, 2.0f, BLUE);
+	}
+	EndTextureMode();
+}
+
 void InitState(void) {
 	state.cols 							= 2;
 	state.rows 							= 2;
@@ -276,12 +284,13 @@ void HandleInputEvents(void) {
 			} else {
 				CA->step();
 			}
+			DrawTex();
 		}
 
-		if(IsKeyDown(KEY_W)) state.center.y -= speed;
-		if(IsKeyDown(KEY_A)) state.center.x -= speed;
-		if(IsKeyDown(KEY_S)) state.center.y += speed;
-		if(IsKeyDown(KEY_D)) state.center.x += speed;
+		if(IsKeyDown(KEY_W)) state.center.y += speed;
+		if(IsKeyDown(KEY_A)) state.center.x += speed;
+		if(IsKeyDown(KEY_S)) state.center.y -= speed;
+		if(IsKeyDown(KEY_D)) state.center.x -= speed;
 
 		if(IsKeyDown(KEY_PAGE_UP)) speed += 1;
 		if(IsKeyDown(KEY_PAGE_DOWN)) speed = (speed <= 4) ? 4 : --speed;
@@ -313,19 +322,20 @@ int get_pos(int x, int y, int size) {
 }
 
 void takeScreenshot(const std::string filename) {
-	Size n = CA->get_size();
-	Image output = GenImageColor(n.x*CELL_SIZE, n.y*CELL_SIZE, WHITE);
-	std::vector<cell> grid = CA->get_grid();
+	/*Size n = CA->get_size();*/
+	/*Image output = GenImageColor(n.x*CELL_SIZE, n.y*CELL_SIZE, WHITE);*/
+	/*std::vector<cell> grid = CA->get_grid();*/
+	/**/
+	/*#pragma omp parallel for*/
+	/*for(int i = 0; i < n.y; ++i) {*/
+	/*	for (int j = 0; j < n.x; ++j) {*/
+	/*		ImageDrawRectangle(&output, (j*CELL_SIZE), (i*CELL_SIZE), */
+	/*										CELL_SIZE, CELL_SIZE,*/
+	/*										cols[grid[CA->get_pos(j, i)].state]);*/
+	/*	}*/
+	/*}*/
 
-	#pragma omp parallel for
-	for(int i = 0; i < n.y; ++i) {
-		for (int j = 0; j < n.x; ++j) {
-			ImageDrawRectangle(&output, (j*CELL_SIZE), (i*CELL_SIZE), 
-											CELL_SIZE, CELL_SIZE,
-											cols[grid[CA->get_pos(j, i)].state]);
-		}
-	}
-
+	Image output = LoadImageFromTexture(tex.texture);
 	ExportImage(output, filename.c_str());
 }
 
