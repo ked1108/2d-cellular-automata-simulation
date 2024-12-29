@@ -32,6 +32,7 @@ void InitState(void);
 void UpdateState(void);
 void HandleInputEvents(void);
 int get_pos(int x, int y, int size);
+int max_val(int z);
 void takeScreenshot(const std::string filename);
 
 

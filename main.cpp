@@ -49,6 +49,7 @@ int main() {
 		}
 		EndDrawing();
 	}
+	UnloadTexture(tex.texture);
 	CloseWindow();
 	return 0;
 }
@@ -63,7 +64,6 @@ void DrawSimScene(void) {
 
 	BeginMode2D(state.camera);
 	DrawTextureRec(tex.texture, (Rectangle){0, 0, (float)tex.texture.width, (float)-tex.texture.height}, (Vector2){X, Y}, WHITE);
-	/*DrawTexture(tex.texture, X, Y, WHITE);*/
 	EndMode2D();
 	std::string text = "Iteration:    "+std::to_string(state.it);
 	DrawRectangle( 10, 10, 250, 133, Fade(SKYBLUE, 0.5f));
@@ -83,13 +83,14 @@ void DrawSimScene(void) {
 	if(GuiButton((Rectangle){state.screenWidth - 190, 60, 80.0f, 20.0f}, "Undo")) {
 		CA->undo_step();
 		--state.it;
+		DrawTex();
 	}
 	if(GuiButton((Rectangle){state.screenWidth - 190, 90, 80.0f, 20.0f}, "Reset")) {
 		state.curr = CONFIG;
-		free(CA);
-		CA=nullptr;
+		delete CA;
 		n.x = 2;
 		n.y = 2;
+		UnloadTexture(tex.texture);
 	}
 }
 
@@ -186,7 +187,7 @@ void DrawConfigScene(void) {
 	}
 	if(GuiValueBox((Rectangle){posX, posY + 90, 100.0f, 20.0f}, 
 								"Rule:    ", 
-								&state.rule, 0, pow(state.z, 9)-1, ruleEditMode)) 
+								&state.rule, 0, max_val(state.z), ruleEditMode)) 
 	{
 		ruleEditMode = !ruleEditMode;
 	}
@@ -321,21 +322,17 @@ int get_pos(int x, int y, int size) {
 	return x+size*y;
 }
 
-void takeScreenshot(const std::string filename) {
-	/*Size n = CA->get_size();*/
-	/*Image output = GenImageColor(n.x*CELL_SIZE, n.y*CELL_SIZE, WHITE);*/
-	/*std::vector<cell> grid = CA->get_grid();*/
-	/**/
-	/*#pragma omp parallel for*/
-	/*for(int i = 0; i < n.y; ++i) {*/
-	/*	for (int j = 0; j < n.x; ++j) {*/
-	/*		ImageDrawRectangle(&output, (j*CELL_SIZE), (i*CELL_SIZE), */
-	/*										CELL_SIZE, CELL_SIZE,*/
-	/*										cols[grid[CA->get_pos(j, i)].state]);*/
-	/*	}*/
-	/*}*/
+inline int max_val(int z) {
+	int val = 0;
+	for(int i = 0; i < 9; i++) {
+		val += pow(z, i);
+	}
+	return val;
+}
 
+void takeScreenshot(const std::string filename) {
 	Image output = LoadImageFromTexture(tex.texture);
+	ImageFlipVertical(&output);
 	ExportImage(output, filename.c_str());
 }
 
