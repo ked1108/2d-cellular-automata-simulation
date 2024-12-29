@@ -23,6 +23,7 @@ typedef struct State {
 	SCREEN curr;
 } State; 
 
+void DrawTex();
 void DrawConfigScene(void);
 void DrawSimScene(void);
 void DrawGridScene(void);
