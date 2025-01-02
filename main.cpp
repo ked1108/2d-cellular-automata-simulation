@@ -217,6 +217,7 @@ void DrawConfigScene(void) {
 void DrawTex() {
 	Size n = CA->get_size();
 	std::vector<cell> grid = CA->get_grid();
+	UnloadRenderTexture(tex);
 	tex = LoadRenderTexture(n.x*CELL_SIZE+2, n.y*CELL_SIZE+2);
 	BeginTextureMode(tex);
 	DrawRectangle(0, 0, CELL_SIZE*n.x, CELL_SIZE*n.y, SKYBLUE);
